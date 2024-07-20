@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:messenger_nurs/screens/splash_screen.dart';
 
@@ -14,7 +15,12 @@ Future<void> main() async {
   final cacheManager = DefaultCacheManager();
   await cacheManager.emptyCache();
 
-  runApp(const MyApp());
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((value) async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {

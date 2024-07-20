@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../consts/color_string.dart';
 import '../../consts/text_string.dart';
-import '../../widgets/MyButton.dart';
-import '../../widgets/MyTextField.dart';
+import '../../widgets/my_button.dart';
+import '../../widgets/my_text_field.dart';
 
 class RegisterScreen extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();

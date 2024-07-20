@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:messenger_nurs/consts/color_string.dart';
 import '../main.dart';
 import '../models/chat_user.dart';
+import '../screens/chat_screen.dart';
 
 class ChatUserCard extends StatefulWidget {
   final ChatUser user;
@@ -22,7 +23,9 @@ class _ChatUserCardState extends State<ChatUserCard> {
       color: Colors.blue.shade100,
       elevation: 0.5,
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => ChatScreen(user: widget.user,)));
+        },
         child: ListTile(
           // leading: CircleAvatar(child: Icon(Icons.person)),
           leading: ClipRRect(

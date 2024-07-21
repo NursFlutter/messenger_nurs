@@ -39,7 +39,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Expanded(
               child: StreamBuilder(
-                  stream: APIs.getALlMessages(widget.user),
+                  stream: APIs.getAllMessages(widget.user),
                   builder: (context, snapshot) {
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
@@ -55,20 +55,18 @@ class _ChatScreenState extends State<ChatScreen> {
                             [];
                         if (_list.isNotEmpty) {
                           return ListView.builder(
+                              reverse: true,
                               itemCount: _list.length,
                               padding: EdgeInsets.only(top: mq.height * .01),
                               physics: const BouncingScrollPhysics(),
                               itemBuilder: (context, index) {
-                                return MessageCard(
-                                  message: _list[index],
-                                );
+                                return MessageCard(message: _list[index]);
                               });
                         } else {
                           return const Center(
-                              child: Text(
-                            'Say Hi! 👋',
-                            style: TextStyle(fontSize: 20),
-                          ));
+                            child: Text('Say Hii! 👋',
+                                style: TextStyle(fontSize: 20)),
+                          );
                         }
                     }
                   }),

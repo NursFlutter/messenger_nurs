@@ -29,15 +29,12 @@ class _ChatUserCardState extends State<ChatUserCard> {
         child: ListTile(
           // leading: CircleAvatar(child: Icon(Icons.person)),
           leading: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(mq.height * .03),
             child: CachedNetworkImage(
               width: mq.height * .045,
               height: mq.height * .045,
               imageUrl: widget.user.image,
-              // placeholder: (context, url) {
-              //   print('Загрузка изображения...');
-              //   return CircularProgressIndicator();
-              // },
+              fit: BoxFit.cover,
               errorWidget: (context, url, error) {
                 print('Ошибка загрузки изображения: $error');
                 return const CircleAvatar(child: Icon(Icons.person));

@@ -100,25 +100,26 @@ class APIs {
   /// ***********************  Chat Screen Related APIs  ***********************
   // chats (collections) --> conversation_id(doc) --> messages (collection) --> message(doc)
 
-  // useful for getting conversation id
+// useful for getting conversation id
   static String getConversationID(String id) => user.uid.hashCode <= id.hashCode
       ? '${user.uid}_$id'
       : '${id}_${user.uid}';
 
   // for getting all messages of a specific conversation from firestore database
-  static Stream<QuerySnapshot<Map<String, dynamic>>> getALlMessages(
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
       ChatUser user) {
     return firestore
         .collection('chats/${getConversationID(user.id)}/messages/')
+        .orderBy('sent', descending: true)
         .snapshots();
   }
 
-  // for sending message
+// for sending message
   static Future<void> sendMessage(ChatUser chatUser, String msg) async {
-    //message sending time(also used as id)
+    //message sending time (also used as id)
     final time = DateTime.now().millisecondsSinceEpoch.toString();
 
-    // message to send
+    //message to send
     final Message message = Message(
         toId: chatUser.id,
         msg: msg,
@@ -139,10 +140,12 @@ class APIs {
         .doc(message.sent)
         .update({'read': DateTime.now().millisecondsSinceEpoch.toString()});
   }
+
+  // get only last message of a specific chat
+  static Stream<QuerySnapshot> getLastMessage(ChatUser user) {
+    return firestore
+        .collection('chats/${getConversationID(user.id)}/messages/')
+        .limit(1)
+        .snapshots();
+  }
 }
-
-
-
-
-
-

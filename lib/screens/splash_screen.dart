@@ -6,6 +6,7 @@ import 'package:messenger_nurs/consts/color_string.dart';
 import '../../main.dart';
 import 'home_screen.dart';
 import 'auth/login_screen.dart';
+
 //splash screen
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,19 +20,12 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 2), () {
-      //exit full-screen
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.white,
-          statusBarColor: Colors.white));
-
       //navigate
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => APIs.auth.currentUser != null
-                ? HomeScreen()
-                : LoginScreen(),
+            builder: (_) =>
+                APIs.auth.currentUser != null ? HomeScreen() : LoginScreen(),
           ));
     });
   }

@@ -1,7 +1,10 @@
+import 'dart:developer';
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:messenger_nurs/models/chat_user.dart';
 import 'package:messenger_nurs/widgets/message_card.dart';
 
@@ -23,22 +26,38 @@ class _ChatScreenState extends State<ChatScreen> {
 
   final _textController = TextEditingController();
 
+  bool _isUploading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // Прозрачный цвет статус-бара
+      statusBarIconBrightness:
+          Brightness.dark, // Темные иконки для светлого фона
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 234, 248, 255),
-        appBar: AppBar(
-          toolbarHeight: 80,
-          shape: Border(bottom: BorderSide(width: 1)),
-          automaticallyImplyLeading: false,
-          flexibleSpace: _appBar(),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SafeArea(
+        top: false,
+        child: Scaffold(
           backgroundColor: const Color.fromARGB(255, 234, 248, 255),
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: StreamBuilder(
+          appBar: AppBar(
+            shape: const Border(bottom: BorderSide(width: 1)),
+            automaticallyImplyLeading: false,
+            flexibleSpace: SafeArea(child: _appBar()),
+            backgroundColor: Colors.white,
+            systemOverlayStyle: SystemUiOverlayStyle
+                .dark, // This ensures icons are visible on a light background
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: StreamBuilder(
                   stream: APIs.getAllMessages(widget.user),
                   builder: (context, snapshot) {
                     switch (snapshot.connectionState) {
@@ -55,13 +74,15 @@ class _ChatScreenState extends State<ChatScreen> {
                             [];
                         if (_list.isNotEmpty) {
                           return ListView.builder(
-                              reverse: true,
-                              itemCount: _list.length,
-                              padding: EdgeInsets.only(top: mq.height * .01),
-                              physics: const BouncingScrollPhysics(),
-                              itemBuilder: (context, index) {
-                                return MessageCard(message: _list[index]);
-                              });
+                            reverse: true,
+                            itemCount: _list.length,
+                            padding: EdgeInsets.only(
+                                top: MediaQuery.of(context).size.height * .01),
+                            physics: const BouncingScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              return MessageCard(message: _list[index]);
+                            },
+                          );
                         } else {
                           return const Center(
                             child: Text('Say Hii! 👋',
@@ -69,10 +90,22 @@ class _ChatScreenState extends State<ChatScreen> {
                           );
                         }
                     }
-                  }),
-            ),
-            _chatInput()
-          ],
+                  },
+                ),
+              ),
+              if (_isUploading)
+                const Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    )),
+              _chatInput(),
+            ],
+          ),
         ),
       ),
     );
@@ -95,6 +128,7 @@ class _ChatScreenState extends State<ChatScreen> {
               width: mq.height * .05,
               height: mq.height * .05,
               imageUrl: widget.user.image,
+              fit: BoxFit.cover,
               errorWidget: (context, url, error) {
                 print('Ошибка загрузки изображения: $error');
                 return const CircleAvatar(child: Icon(Icons.person));
@@ -137,18 +171,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   borderRadius: BorderRadius.circular(15)),
               child: Row(
                 children: [
-                  IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.emoji_emotions,
-                        color: Colors.blueAccent,
-                        size: 24,
-                      )),
+                  const SizedBox(width: 10),
                   Expanded(
                       child: TextField(
                     controller: _textController,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
+                    onTap: () {},
                     decoration: const InputDecoration(
                         hintText: 'Type Something...',
                         hintStyle: TextStyle(
@@ -157,14 +186,40 @@ class _ChatScreenState extends State<ChatScreen> {
                         border: InputBorder.none),
                   )),
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+
+                        // picking multiple images
+                        final List<XFile>? images =
+                            await picker.pickMultiImage(imageQuality: 70);
+
+                        // uploading & sending image one by one
+                        for (var i in images!) {
+                          log('Image Path: ${i.path}');
+                          setState(() => _isUploading = true);
+                          await APIs.sendChatImage(widget.user, File(i.path));
+                          setState(() => _isUploading = false);
+                        }
+                      },
                       icon: const Icon(
                         Icons.image,
                         color: Colors.blueAccent,
                         size: 26,
                       )),
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        final XFile? image = await picker.pickImage(
+                            source: ImageSource.camera, imageQuality: 70);
+                        if (image != null) {
+                          log('Image Path: ${image.path}');
+                          setState(() => _isUploading = true);
+
+                          await APIs.sendChatImage(
+                              widget.user, File(image.path));
+                          setState(() => _isUploading = false);
+                        }
+                      },
                       icon: const Icon(
                         Icons.camera_alt_outlined,
                         color: Colors.blueAccent,
@@ -178,7 +233,7 @@ class _ChatScreenState extends State<ChatScreen> {
           MaterialButton(
             onPressed: () {
               if (_textController.text.isNotEmpty) {
-                APIs.sendMessage(widget.user, _textController.text);
+                APIs.sendMessage(widget.user, _textController.text, Type.text);
                 _textController.text = '';
               }
             },

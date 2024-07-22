@@ -19,6 +19,7 @@ dependencies:
   flutter_cache_manager: ^3.0.0
   image_picker: ^1.1.2
   firebase_storage: ^12.1.1
+  emoji_picker_flutter: ^2.2.0
 
 dev_dependencies:
   flutter_test:

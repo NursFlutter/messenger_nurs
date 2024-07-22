@@ -53,7 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: Colors.white,
             appBar: AppBar(
               backgroundColor: Colors.white,
-              toolbarHeight: 80,
               title: _isSearching
                   ? TextField(
                       autofocus: true,

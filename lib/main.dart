@@ -14,13 +14,9 @@ Future<void> main() async {
   // Очистка кэша Flutter Cache Manager
   final cacheManager = DefaultCacheManager();
   await cacheManager.emptyCache();
-
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((value) async {
-    WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     runApp(const MyApp());
-  });
 }
 
 class MyApp extends StatelessWidget {

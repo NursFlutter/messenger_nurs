@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:messenger_nurs/api/apis.dart';
 import 'package:messenger_nurs/screens/profile_screen.dart';
@@ -30,6 +33,21 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     APIs.getSelfInfo();
+    APIs.updateActiveStatus(true);
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      log('Message: ${message}');
+
+      if (APIs.auth.currentUser != null) {
+        if (message.toString().contains('resume')) {
+          APIs.updateActiveStatus(true);
+        }
+        if (message.toString().contains('pause')) {
+          APIs.updateActiveStatus(false);
+        }
+      }
+
+      return Future.value(message);
+    });
   }
 
   @override
@@ -110,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // button to add new user
               child: FloatingActionButton(
-                onPressed: (){},
+                onPressed: () {},
                 // onPressed: () async {
                 //   await APIs.auth.signOut();
                 //   await GoogleSignIn().signOut();

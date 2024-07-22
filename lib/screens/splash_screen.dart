@@ -50,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen> {
         Positioned(
             bottom: mq.height * .15,
             width: mq.width,
-            child: const Text('NURS MESSENGER️',
+            child: const Text('EchoHub',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 24, color: Colors.black87, letterSpacing: .5))),

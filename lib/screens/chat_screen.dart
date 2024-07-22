@@ -1,10 +1,12 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:messenger_nurs/helper/my_date_util.dart';
 import 'package:messenger_nurs/models/chat_user.dart';
 import 'package:messenger_nurs/widgets/message_card.dart';
 
@@ -32,9 +34,9 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent, // Прозрачный цвет статус-бара
+      statusBarColor: Colors.transparent,
       statusBarIconBrightness:
-          Brightness.dark, // Темные иконки для светлого фона
+          Brightness.dark,
     ));
   }
 
@@ -112,50 +114,76 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _appBar() {
-    return InkWell(
-      onTap: () {},
-      child: Row(
-        children: [
-          IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(
-                Icons.arrow_back,
-                color: Colors.black54,
-              )),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(mq.height * .03),
-            child: CachedNetworkImage(
-              width: mq.height * .05,
-              height: mq.height * .05,
-              imageUrl: widget.user.image,
-              fit: BoxFit.cover,
-              errorWidget: (context, url, error) {
-                print('Ошибка загрузки изображения: $error');
-                return const CircleAvatar(child: Icon(Icons.person));
-              },
-            ),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.user.name,
-                style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 2),
-              const Text(
-                'Last seen nul avaible',
-                style: TextStyle(fontSize: 13, color: Colors.black54),
-              ),
-            ],
-          )
-        ],
-      ),
+    return SafeArea(
+      child: InkWell(
+          onTap: (){},
+          child: StreamBuilder(
+              stream: APIs.getUserInfo(widget.user),
+              builder: (context, snapshot) {
+                final data = snapshot.data?.docs;
+                final list =
+                    data?.map((e) => ChatUser.fromJson(e.data())).toList() ??
+                        [];
+
+                return Row(
+                  children: [
+                    //back button
+                    IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.arrow_back,
+                            color: Colors.black54)),
+
+                    //user profile picture
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(mq.height * .03),
+                      child: CachedNetworkImage(
+                        width: mq.height * .05,
+                        height: mq.height * .05,
+                        fit: BoxFit.cover,
+                        imageUrl:
+                        list.isNotEmpty ? list[0].image : widget.user.image,
+                        errorWidget: (context, url, error) =>
+                        const CircleAvatar(
+                            child: Icon(CupertinoIcons.person)),
+                      ),
+                    ),
+
+                    //for adding some space
+                    const SizedBox(width: 10),
+
+                    //user name & last seen time
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        //user name
+                        Text(list.isNotEmpty ? list[0].name : widget.user.name,
+                            style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w500)),
+
+                        //for adding some space
+                        const SizedBox(height: 2),
+
+                        //last seen time of user
+                        Text(
+                            list.isNotEmpty
+                                ? list[0].isOnline
+                                ? 'Online'
+                                : MyDateUtil.getLastActiveTime(
+                                context: context,
+                                lastActive: list[0].lastActive)
+                                : MyDateUtil.getLastActiveTime(
+                                context: context,
+                                lastActive: widget.user.lastActive),
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.black54)),
+                      ],
+                    )
+                  ],
+                );
+              })),
     );
   }
 

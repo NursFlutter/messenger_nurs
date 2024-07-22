@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:messenger_nurs/helper/my_date_util.dart';
 import 'package:messenger_nurs/models/chat_user.dart';
+import 'package:messenger_nurs/screens/view_profile_screen.dart';
 import 'package:messenger_nurs/widgets/message_card.dart';
 
 import '../api/apis.dart';
@@ -35,8 +36,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness:
-          Brightness.dark,
+      statusBarIconBrightness: Brightness.dark,
     ));
   }
 
@@ -116,7 +116,12 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _appBar() {
     return SafeArea(
       child: InkWell(
-          onTap: (){},
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => ViewProfileScreen(user: widget.user)));
+          },
           child: StreamBuilder(
               stream: APIs.getUserInfo(widget.user),
               builder: (context, snapshot) {
@@ -141,10 +146,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         height: mq.height * .05,
                         fit: BoxFit.cover,
                         imageUrl:
-                        list.isNotEmpty ? list[0].image : widget.user.image,
+                            list.isNotEmpty ? list[0].image : widget.user.image,
                         errorWidget: (context, url, error) =>
-                        const CircleAvatar(
-                            child: Icon(CupertinoIcons.person)),
+                            const CircleAvatar(
+                                child: Icon(CupertinoIcons.person)),
                       ),
                     ),
 
@@ -170,13 +175,13 @@ class _ChatScreenState extends State<ChatScreen> {
                         Text(
                             list.isNotEmpty
                                 ? list[0].isOnline
-                                ? 'Online'
+                                    ? 'Online'
+                                    : MyDateUtil.getLastActiveTime(
+                                        context: context,
+                                        lastActive: list[0].lastActive)
                                 : MyDateUtil.getLastActiveTime(
-                                context: context,
-                                lastActive: list[0].lastActive)
-                                : MyDateUtil.getLastActiveTime(
-                                context: context,
-                                lastActive: widget.user.lastActive),
+                                    context: context,
+                                    lastActive: widget.user.lastActive),
                             style: const TextStyle(
                                 fontSize: 13, color: Colors.black54)),
                       ],
